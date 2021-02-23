@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "725009224325",
+    "project_id": "piwshoppermall",
+    "storage_bucket": "piwshoppermall.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:725009224325:android:09cca013289bd4cd084fec",
+        "android_client_info": {
+          "package_name": "com.flutterthailand.piwsupermall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "725009224325-qccg7r00gelbe9k288nhju7svdfnopps.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBddjdtchRL9xoj5M-t5smjycdfsBYaLqs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "725009224325-qccg7r00gelbe9k288nhju7svdfnopps.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
