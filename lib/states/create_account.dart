@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:piwsupermall/models/typeuser_model.dart';
+import 'package:piwsupermall/utility/api.dart';
 import 'package:piwsupermall/utility/dialog.dart';
 import 'package:piwsupermall/utility/my_style.dart';
 
@@ -160,18 +163,25 @@ class _CreateAccountState extends State<CreateAccount> {
       await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: user, password: password)
           .then((value) async {
-            String uid = value.user.uid;
-            print('uid==>>$uid');
+        String uid = value.user.uid;
+        print('uid==>>$uid');
 
-            //update Display Name
-            await value.user.updateProfile(displayName: name);
+        //update Display Name
+        await value.user.updateProfile(displayName: name);
 
-            //Insert Value To CloudFirestore
-            
+        //Insert Value To CloudFirestore
+        TypeUserModel model = TypeUserModel(name: name, typeuser: typeUser);
+        Map<String, dynamic> data = model.toMap();
 
-
-          })
-          .catchError((onError) =>
+        await FirebaseFirestore.instance
+            .collection('typeuser')
+            .doc(uid)
+            .set(data)
+            .then((value) {
+              String result = Api().findKeyByTypeUser(typeUser);
+              Navigator.pushNamedAndRemoveUntil(context, result, (route) => false);
+            });
+      }).catchError((onError) =>
               normalDialog(context, onError.code, onError.message));
     });
   }
@@ -190,7 +200,9 @@ class _CreateAccountState extends State<CreateAccount> {
           } else if (typeUser == null) {
             normalDialog(context, 'No TypeUser',
                 'Please Choose Type User by Click Buyer or Shopper');
-          } else {}
+          } else {
+            createSingInAndInsertData();
+          }
         },
         icon: Icon(Icons.cloud_upload),
         label: Text('Create Account'),

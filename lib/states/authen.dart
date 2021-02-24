@@ -1,4 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:piwsupermall/models/typeuser_model.dart';
+import 'package:piwsupermall/utility/api.dart';
+import 'package:piwsupermall/utility/dialog.dart';
 import 'package:piwsupermall/utility/my_style.dart';
 
 class Authen extends StatefulWidget {
@@ -8,6 +14,7 @@ class Authen extends StatefulWidget {
 
 class _AuthenState extends State<Authen> {
   double screen;
+  String user, password;
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +32,6 @@ class _AuthenState extends State<Authen> {
     );
   }
 
-  
-
   Column buildCreateAccount() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -36,7 +41,7 @@ class _AuthenState extends State<Authen> {
           children: [
             MyStyle().titleH3Button('Non Account ?'),
             TextButton(
-              onPressed: () =>Navigator.pushNamed(context, '/createAccount'),
+              onPressed: () => Navigator.pushNamed(context, '/createAccount'),
               child: MyStyle().titleH3Button('Create Button'),
             ),
           ],
@@ -66,10 +71,34 @@ class _AuthenState extends State<Authen> {
       width: screen * 0.6,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(primary: MyStyle().primarydarkColor),
-        onPressed: () {},
+        onPressed: () {
+          if ((user?.isEmpty ?? true) || (password?.isEmpty ?? true)) {
+            normalDialog(context, 'Have Space?', 'Please Fill Every Blank');
+          } else {
+            checkAuth();
+          }
+        },
         child: Text('Login'),
       ),
     );
+  }
+
+  Future<Null> checkAuth() async {
+    await Firebase.initializeApp().then((value) async {});
+    await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: user, password: password)
+        .then((value) async {
+      await FirebaseFirestore.instance
+          .collection('typeuser')
+          .doc(value.user.uid)
+          .snapshots()
+          .listen((event) {
+        TypeUserModel model = TypeUserModel.fromMap(event.data());
+        Navigator.pushNamedAndRemoveUntil(
+            context, Api().findKeyByTypeUser(model.typeuser), (route) => false);
+      });
+    }).catchError(
+            (onError) => normalDialog(context, onError.code, onError.massage));
   }
 
   Container buildUser() {
@@ -77,6 +106,7 @@ class _AuthenState extends State<Authen> {
         margin: EdgeInsets.only(top: 16),
         width: screen * 0.6,
         child: TextField(
+          onChanged: (value) => user = value.trim(),
           decoration: InputDecoration(
             prefixIcon: Icon(
               Icons.perm_identity,
@@ -98,6 +128,7 @@ class _AuthenState extends State<Authen> {
         margin: EdgeInsets.only(top: 16),
         width: screen * 0.6,
         child: TextField(
+          onChanged: (value) => password = value.trim(),
           decoration: InputDecoration(
             prefixIcon: Icon(
               Icons.lock_outline,
